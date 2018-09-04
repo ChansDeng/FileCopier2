@@ -35,7 +35,7 @@ namespace FileCopier
                     TreeNode ndRoot = new TreeNode(rootDirectoryName);
                     tvw.Nodes.Add(ndRoot);
 
-                    if ( isSource)
+                    if (isSource)
                     {
                         GetSubDirectoryNodes(ndRoot, ndRoot.Text, true, 1);
                     }
@@ -51,13 +51,13 @@ namespace FileCopier
                 Application.DoEvents();
             }
         }
-        private void GetSubDirectoryNodes(TreeNode parentNode, 
+        private void GetSubDirectoryNodes(TreeNode parentNode,
             string fullName, bool getFileNames, int level)
         {
             DirectoryInfo dir = new DirectoryInfo(fullName);
             DirectoryInfo[] dirSubs = dir.GetDirectories();
 
-            foreach (DirectoryInfo dirSub in  dirSubs)
+            foreach (DirectoryInfo dirSub in dirSubs)
             {
                 if ((dirSub.Attributes & FileAttributes.Hidden) != 0)
                 {
@@ -81,6 +81,52 @@ namespace FileCopier
                     parentNode.Nodes.Add(fileNode);
                 }
             }
+        }
+
+        private void tvwSource_AfterCheck(object sender, TreeViewEventArgs e)
+        {
+            SetCheck(e.Node, e.Node.Checked);
+        }
+
+        private void SetCheck(TreeNode node, bool check)
+        {
+            foreach (TreeNode n in node.Nodes)
+            {
+                n.Checked = check; // check the node
+                if (n.Nodes.Count != 0)
+                {
+                    SetCheck(n, check);
+                }
+            }
+        }
+
+        private void tvwSource_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            tvwExpand(sender, e.Node);
+        }
+
+        private void tvwExpand(object sender, TreeNode currentNode)
+        {
+            TreeView tvw = (TreeView)sender;
+            bool getFiles = (tvw == tvwSource);
+            string fullName = currentNode.FullPath;
+            currentNode.Nodes.Clear();
+            GetSubDirectoryNodes(currentNode, fullName, getFiles, 1);
+        }
+
+        private void tvwTarget_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            tvwExpand(sender, e.Node);
+        }
+
+        private void tvwTarget_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            string theFullPath = e.Node.FullPath;
+            if (theFullPath.EndsWith("\\"))
+            {
+                theFullPath = theFullPath.Substring(0, theFullPath.Length - 1);
+            }
+            txtTargetDir.Text = theFullPath;
         }
     }
 }

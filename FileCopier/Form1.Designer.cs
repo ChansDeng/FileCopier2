@@ -75,6 +75,8 @@
             this.tvwSource.Name = "tvwSource";
             this.tvwSource.Size = new System.Drawing.Size(235, 243);
             this.tvwSource.TabIndex = 3;
+            this.tvwSource.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tvwSource_AfterCheck);
+            this.tvwSource.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvwSource_BeforeExpand);
             // 
             // tvwTarget
             // 
@@ -82,6 +84,8 @@
             this.tvwTarget.Name = "tvwTarget";
             this.tvwTarget.Size = new System.Drawing.Size(235, 216);
             this.tvwTarget.TabIndex = 4;
+            this.tvwTarget.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvwTarget_BeforeExpand);
+            this.tvwTarget.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvwTarget_AfterSelect);
             // 
             // btnClear
             // 
