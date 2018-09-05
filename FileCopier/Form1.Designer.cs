@@ -95,6 +95,7 @@
             this.btnClear.TabIndex = 5;
             this.btnClear.Text = "Clear";
             this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // lblStatus
             // 
@@ -123,6 +124,7 @@
             this.btnCopy.TabIndex = 8;
             this.btnCopy.Text = "Copy";
             this.btnCopy.UseVisualStyleBackColor = true;
+            this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
             // 
             // btnDelete
             // 
@@ -132,6 +134,7 @@
             this.btnDelete.TabIndex = 9;
             this.btnDelete.Text = "Delete";
             this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // btnCancel
             // 
@@ -141,6 +144,7 @@
             this.btnCancel.TabIndex = 10;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // FrmFileCopier
             // 
@@ -160,6 +164,7 @@
             this.Controls.Add(this.lblSource);
             this.Name = "FrmFileCopier";
             this.Text = "File Copier";
+            this.Load += new System.EventHandler(this.FrmFileCopier_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

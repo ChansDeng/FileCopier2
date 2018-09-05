@@ -6,7 +6,6 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FileCopier
@@ -20,6 +19,21 @@ namespace FileCopier
 
             FillDirectoryTree(tvwSource, true);
             FillDirectoryTree(tvwTarget, false);
+        }
+        public class FileComparer : IComparer<FileInfo>
+        {
+            public int Compare(FileInfo file1, FileInfo file2)
+            {
+                if (file1.Length > file2.Length)
+                {
+                    return -1;
+                }
+                if (file1.Length < file2.Length)
+                {
+                    return 1;
+                }
+                return 0;
+            }
         }
         private void FillDirectoryTree(TreeView tvw, bool isSource)
         {
@@ -105,6 +119,11 @@ namespace FileCopier
             tvwExpand(sender, e.Node);
         }
 
+        private void tvwTarget_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            tvwExpand(sender, e.Node);
+        }
+
         private void tvwExpand(object sender, TreeNode currentNode)
         {
             TreeView tvw = (TreeView)sender;
@@ -112,11 +131,6 @@ namespace FileCopier
             string fullName = currentNode.FullPath;
             currentNode.Nodes.Clear();
             GetSubDirectoryNodes(currentNode, fullName, getFiles, 1);
-        }
-
-        private void tvwTarget_BeforeExpand(object sender, TreeViewCancelEventArgs e)
-        {
-            tvwExpand(sender, e.Node);
         }
 
         private void tvwTarget_AfterSelect(object sender, TreeViewEventArgs e)
@@ -127,6 +141,122 @@ namespace FileCopier
                 theFullPath = theFullPath.Substring(0, theFullPath.Length - 1);
             }
             txtTargetDir.Text = theFullPath;
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            foreach (TreeNode node in tvwSource.Nodes)
+            {
+                SetCheck(node, false);
+            }
+        }
+
+        private void btnCopy_Click(object sender, EventArgs e)
+        {
+            List<FileInfo> fileList = GetFileList();
+            foreach (FileInfo file in fileList)
+            {
+                try
+                {
+                    lblStatus.Text = "Copying " + txtTargetDir.Text +
+                        "\\" + file.Name + "...";
+                    Application.DoEvents();
+                    // copy the file to its destinaion location
+                    file.CopyTo(txtTargetDir.Text + "\\" + file.Name,
+                        chkOverWrite.Checked);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+            lblStatus.Text = "Done.";
+        }
+        private List<FileInfo> GetFileList()
+        {
+            List<string> fileNames = new List<string>();
+            foreach (TreeNode theNode in tvwSource.Nodes)
+            {
+                GetCheckedFiles(theNode, fileNames);
+            }
+            List<FileInfo> fileList = new List<FileInfo>();
+            foreach (string fileName in fileNames)
+            {
+                FileInfo file = new FileInfo(fileName);
+                if (file.Exists)
+                {
+                    fileList.Add(file);
+                }
+            }
+            IComparer<FileInfo> comparer = (IComparer<FileInfo>)new
+                FileComparer();
+            fileList.Sort(comparer);
+            return fileList;
+        }
+        
+        private void GetCheckedFiles(TreeNode node, List<string> fileNames)
+        {
+            // if this is a leaf
+            if (node.Nodes.Count == 0)
+            {
+                // if the node was checked...
+                if (node.Checked)
+                {
+                    // add the full path to the arrayList
+                    fileNames.Add(node.FullPath);
+                }
+                else
+                {
+                    foreach (TreeNode n in node.Nodes)
+                    {
+                        GetCheckedFiles(n, fileNames);
+                    }
+                }
+            }
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            // ask them if they are sure
+            System.Windows.Forms.DialogResult result = MessageBox.Show("Are you" +
+                " quite sure?",  // msg
+                "Delete Files",  // caption
+                MessageBoxButtons.OKCancel, // buttons
+                MessageBoxIcon.Exclamation, // icons
+                MessageBoxDefaultButton.Button2); // defaut button
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                List<FileInfo> fileNames = GetFileList();
+                foreach (FileInfo file in fileNames)
+                {
+                    try
+                    {
+                        // update the label to show progress
+                        lblStatus.Text = "Deleting" + txtTargetDir.Text + "\\" +
+                            file.Name + "...";
+                        Application.DoEvents();
+                        file.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        // you may want to do more than just show the
+                        // messsage
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+                lblStatus.Text = "Done.";
+                Application.DoEvents();
+            }
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void FrmFileCopier_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
